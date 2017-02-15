@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Make daily/weekly/monthly backups of a mysql database
+# and cleanup old backups allways keeping some of them
+
+# Exit on error and debug all steps
+set -ex
+
+BACKUP_FOLDER=/home/representaciones/backups
+DATABASE=representaciones_production
+DAILY=$BACKUP_FOLDER/daily-$(date -I).sql.gz
+WEEKLY=$BACKUP_FOLDER/weekly-$(date +%Y-%U).sql.gz
+MONTHLY=$BACKUP_FOLDER/monthly-$(date +%Y-%m).sql.gz
+
+run_backup () {
+  mysqldump -u root $DATABASE | gzip > $DAILY
+}
+
+keep_newers () {
+  PATTERN=$1
+  COUNT=$2
+
+  find $BACKUP_FOLDER -iname "$PATTERN*" |
+  sort |
+  head -n -$COUNT |
+  xargs --no-run-if-empty --verbose rm
+}
+
+[ ! -f $DAILY ]  && run_backup
+[ ! -f $WEEKLY ]  && cp $DAILY $WEEKLY
+[ ! -f $MONTHLY ]  && cp $DAILY $MONTHLY
+
+# remove old backups
+keep_newers daily 7
+keep_newers weekly 3
+keep_newers monthly 3
