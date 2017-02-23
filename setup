@@ -8,5 +8,13 @@ then
   exit
 fi
 
-cp -pf files/backup_database /etc/cron.daily/
+# configure ssh
+mkdir -p /root/.ssh
+cp -pf files/authorized_keys /root/.ssh/
+cp -pf files/sshd_config /etc/ssh/
+
+# configure dhclient (dhcp)
 cp -pf files/dhclient.conf /etc/dhcp/dhclient.conf
+
+# schedule database backup
+cp -pf files/backup_database /etc/cron.daily/
