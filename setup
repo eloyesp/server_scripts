@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -xe
+
+if [ "$EUID" -ne 0 ]
+then
+  echo "Please run as root"
+  exit
+fi
+
+cp -pf files/backup_database /etc/cron.daily/
+cp -pf files/dhclient.conf /etc/dhcp/dhclient.conf
