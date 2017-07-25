@@ -18,15 +18,27 @@ aptitude update && aptitude install -y vim git ruby ruby-dev build-essential \
 
 echo "Configuring ssh"
 mkdir -p /root/.ssh
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
+[ -f /root/.ssh/authorized_keys ] || echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
 " >> /root/.ssh/authorized_keys
 chmod 600 /root/.ssh/authorized_keys
 
 echo "Disable password login with ssh"
 augtool -s "set /files/etc/ssh/sshd_config/PasswordAuthentication no"
-
-echo "Scheduling database backup"
-cp -pf files/backup_database /etc/cron.daily/
+service ssh reload
 
 echo "Creating the user for the application"
 adduser representaciones --disabled-password
+
+echo "Configuring ssh for representaciones"
+mkdir -p /home/representaciones/.ssh
+[ -f /home/representaciones/.ssh/authorized_keys ] || echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
+" >> /home/representaciones/.ssh/authorized_keys
+chmod 600 /home/representaciones/.ssh/authorized_keys
+chown representaciones:representaciones /home/representaciones/.ssh/authorized_keys
+
+echo "Setup deploy folder"
+mkdir -p /var/www/representaciones
+chown representaciones:representaciones /var/www/representaciones
+
+echo "Scheduling database backup"
+echo "[disabled] cp -pf files/backup_database /etc/cron.daily/"
