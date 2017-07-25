@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -xe
+set -x
+set -e
 
 if [ "$EUID" -ne 0 ]
 then
@@ -9,6 +10,7 @@ then
 fi
 
 echo "Installing packages"
+apt-get install aptitude
 aptitude update && aptitude install -y vim git ruby ruby-dev build-essential \
   mysql-server libmysqlclient-dev \
   nodejs nodejs-legacy \
