@@ -5,16 +5,26 @@ set -xe
 if [ "$EUID" -ne 0 ]
 then
   echo "Please run as root"
-  exit
+  exit 1
 fi
 
-# configure ssh
+echo "Installing packages"
+aptitude update && aptitude install -y vim git ruby ruby-dev build-essential \
+  mysql-server libmysqlclient-dev \
+  nodejs nodejs-legacy \
+  augeas-tools etckeeper
+
+echo "Configuring ssh"
 mkdir -p /root/.ssh
-cp -pf files/authorized_keys /root/.ssh/
-cp -pf files/sshd_config /etc/ssh/
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
+" >> /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
 
-# configure dhclient (dhcp)
-cp -pf files/dhclient.conf /etc/dhcp/dhclient.conf
+echo "Disable password login with ssh"
+augtool -s "set /files/etc/ssh/sshd_config/PasswordAuthentication no"
 
-# schedule database backup
+echo "Scheduling database backup"
 cp -pf files/backup_database /etc/cron.daily/
+
+echo "Creating the user for the application"
+adduser representaciones --disabled-password
