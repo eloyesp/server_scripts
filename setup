@@ -10,7 +10,7 @@ then
 fi
 
 echo "Installing packages"
-apt-get install aptitude
+which aptitude || apt-get install aptitude
 aptitude update && aptitude install -y vim git ruby ruby-dev build-essential \
   mysql-server libmysqlclient-dev \
   nodejs nodejs-legacy \
@@ -28,19 +28,18 @@ echo "Disable password login with ssh"
 augtool -s "set /files/etc/ssh/sshd_config/PasswordAuthentication no"
 service ssh reload
 
-echo "Creating the user for the application"
-[ -d /home/representaciones ] || adduser representaciones --disabled-password
+read -r -p "Application name: " application_name
 
-echo "Configuring ssh for representaciones"
-mkdir -p /home/representaciones/.ssh
-[ -f /home/representaciones/.ssh/authorized_keys ] || echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
-" >> /home/representaciones/.ssh/authorized_keys
-chmod 600 /home/representaciones/.ssh/authorized_keys
-chown representaciones:representaciones /home/representaciones/.ssh/authorized_keys
+echo "Creating the user for the application"
+[ -d /home/$application_name ] || adduser $application_name --disabled-password
+
+echo "Configuring ssh for $application_name"
+mkdir -p /home/$application_name/.ssh
+[ -f /home/$application_name/.ssh/authorized_keys ] || echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDNEtpAq3cp8kpMY8gmpVgt/EnzfF54OrEcWrDUDmoItTglvAoToW3AiL5Q8r9LjYUTaSRkGQADrKv43WL+qgnC4+9z2WXVjLF6AzQw/HkdvNih/CZoiW5Oka8L1hbbp+UzhT69lKz2h1/XDu0HLMQYu7IJqCNDUek09KSPVBRtpMhWOcEmHnJCOemcr494m0mTbVIs9uI6hSsnfkj6CoMS+ANFuwKJQtO/cLLpAHQmApto6Tu29P3zMKG2UMYLj8RkTVmhPUhCt4p3eXMICoya2sSeDjaRikGuTP4JR+reymtF6bcB3eOLbNo7LEJ3caaFt+HrHeX9AiX475FfSyHT eloyesp@cobre
+" >> /home/$application_name/.ssh/authorized_keys
+chmod 600 /home/$application_name/.ssh/authorized_keys
+chown $application_name:$application_name /home/$application_name/.ssh/authorized_keys
 
 echo "Setup deploy folder"
-mkdir -p /var/www/representaciones
-chown representaciones:representaciones /var/www/representaciones
-
-echo "Scheduling database backup"
-echo "[disabled] cp -pf files/backup_database /etc/cron.daily/"
+mkdir -p /var/www/$application_name
+chown $application_name:$application_name /var/www/$application_name
